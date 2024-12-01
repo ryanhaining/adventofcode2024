@@ -7,7 +7,10 @@ similarity ns =
     nums = map (!!0) ns
     counts = fromListWith (+)  (map (\n -> (n!!1,1)) ns)
 
+readPairs :: String -> [Int]
+readPairs = map (read :: String->Int) . words
+
 main :: IO()
 main = do
   inp <- getContents
-  print $ similarity (map  (map (read :: String->Int) . words) (lines inp))
+  print $ similarity (map  readPairs (lines inp))
