@@ -6,7 +6,7 @@ from typing import Sequence, Iterable, TypeVar
 T = TypeVar('T')
 
 
-def sliding_window(seq: Iterable[T], size) -> Iterable[Sequence[T]]:
+def sliding_window(seq: Iterable[T], size: int) -> Iterable[Sequence[T]]:
     it = iter(seq)
     elems = collections.deque(itertools.islice(it, size))
     yield elems
@@ -21,12 +21,14 @@ ANY_TERM = (TERM, TERM[::-1])
 TERM_LEN = len(TERM)
 LINE_PADDING = '.' * TERM_LEN
 
-lines = sys.stdin.readlines()
-# Pad the input so we can avoid bounds checking later.
-lines = [f'{LINE_PADDING}{line.rstrip()}{LINE_PADDING}' for line in lines]
+
+def padded(lines: Iterable[str]) -> Iterable[str]:
+    """Pad the input so we can avoid bounds checking later."""
+    return (LINE_PADDING + line.rstrip() + LINE_PADDING for line in lines)
+
 
 total = 0
-for chunk in sliding_window(lines, TERM_LEN):
+for chunk in sliding_window(padded(sys.stdin), TERM_LEN):
     for col in range(TERM_LEN, len(chunk[0]) - TERM_LEN):
         diag_fwd = ''.join(chunk[n][col + n] for n in range(TERM_LEN))
         diag_back = ''.join(chunk[n][col + (TERM_LEN - 1 - n)] for n in range(TERM_LEN))
