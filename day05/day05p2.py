@@ -1,34 +1,24 @@
-import collections
+import itertools
 import sys
 
-order = collections.defaultdict(list)
 
-for line in sys.stdin:
-    line = line.rstrip()
-    if not line:
-        break
-    n1, n2 = line.split('|')
-    order[int(n1)].append(int(n2))
+def weight(n: int, rules: set[tuple[int, int]]) -> int:
+    return sum(r[0] == n for r in rules)
+
+
+all_rules: set[tuple[int, int]] = {
+    (int((ns := line.split('|'))[0]), int(ns[1]))
+    for line in itertools.takewhile(lambda s: s != '\n', sys.stdin)
+}
+
 
 total = 0
 for line in sys.stdin:
     update = [int(n) for n in line.rstrip().split(',')]
-    to_count = False
-    # We can ignore the second half since we only need the middle value
-    for i in range(len(update) // 2 + 1):
-        again = True
-        while again:
-            again = False
-            for j in range(i + 1, len(update)):
-                n = update[j]
-                cur = update[i]
-                if cur in order[n]:
-                    update.pop(i)
-                    update.insert(update.index(n) + 1, cur)
-                    to_count = True
-                    again = True
-    if to_count:
-        total += update[len(update) // 2]
+    relevant = {r for r in all_rules if r[0] in update and r[1] in update}
+    correct = sorted(update, key=lambda n: weight(n, relevant), reverse=True)
+    if correct != update:
+        total += correct[len(correct) // 2]
 
 
 print(total)
