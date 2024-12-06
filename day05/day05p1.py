@@ -2,7 +2,7 @@ import collections
 import itertools
 import sys
 
-order = collections.defaultdict(list)
+order = collections.defaultdict(set)
 
 for line in sys.stdin:
     line = line.rstrip()
@@ -10,13 +10,15 @@ for line in sys.stdin:
         break
     n1, n2 = line.split('|')
 
-    order[int(n1)].append(int(n2))
+    order[int(n2)].add(int(n1))
 
 total = 0
 for line in sys.stdin:
     update = [int(n) for n in line.rstrip().split(',')]
-    for i, cur in enumerate(update):
-        if any(cur in order[n] for n in itertools.islice(update, i + 1, None)):
+    rest = set(update)
+    for cur in update:
+        rest.remove(cur)
+        if rest & order[cur]:
             break
     else:
         total += update[len(update) // 2]
