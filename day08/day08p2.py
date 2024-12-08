@@ -22,15 +22,17 @@ def add_all(
 
 lines = [line.rstrip() for line in sys.stdin]
 
-d = collections.defaultdict(list)
+locations: collections.defaultdict[str, list[tuple[int, int]]] = (
+    collections.defaultdict(list)
+)
 
 for row_index, row in enumerate(lines):
     for col_index, col in enumerate(row):
         if col != '.':
-            d[col].append((row_index, col_index))
+            locations[col].append((row_index, col_index))
 
-result = set(itertools.chain.from_iterable(d.values()))
-for locs in d.values():
+result = set(itertools.chain.from_iterable(locations.values()))
+for locs in locations.values():
     for i1 in range(len(locs)):
         for i2 in range(i1 + 1, len(locs)):
             r1, c1 = locs[i1]
