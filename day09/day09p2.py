@@ -1,4 +1,5 @@
 import collections
+import heapq
 from dataclasses import dataclass
 import sys
 from typing import Optional
@@ -16,7 +17,7 @@ class Block:
 
 nums = [int(n) for n in sys.stdin.readlines()[0].rstrip()]
 
-# block size -> list of indices
+# block size -> heap  of indices
 free_blocks: collections.defaultdict[int, list[int]] = collections.defaultdict(list)
 
 counter = 0
@@ -26,7 +27,7 @@ index = 0
 for n in nums:
     if free_flag:
         if n:
-            free_blocks[n].append(index)
+            heapq.heappush(free_blocks[n], index)
     else:
         fs.append(Block(index=index, size=n, f_id=counter))
         counter += 1
@@ -34,31 +35,28 @@ for n in nums:
     free_flag = not free_flag
 
 
-def find_first_free(
-    size: int, free_blocks: dict[int, list[int]]
-) -> Optional[tuple[int, int]]:
-    options = []
-    for s in range(size, MAX_SIZE + 1):
-        if free_blocks[s]:
-            options.append((s, min(free_blocks[s])))
-    return min(options, key=lambda t: t[1]) if options else None
+def find_first_free(size: int, free_blocks: dict[int, list[int]]) -> Optional[int]:
+    # https://github.com/python/mypy/issues/14664 for type: ignore
+    # mypy thinks the key function neds to be able to handle None
+    return min(
+        (sz for sz in range(size, MAX_SIZE + 1) if free_blocks[sz]),
+        key=lambda sz: free_blocks[sz][0],  # type: ignore
+        default=None,
+    )
 
 
 for block in reversed(fs):
-    find_result = find_first_free(block.size, free_blocks)
-    if find_result is None:
+    free_block_size = find_first_free(block.size, free_blocks)
+    if free_block_size is None:
         continue
-    free_block_size, free_block_index = find_result
+    free_block_index = free_blocks[free_block_size][0]
     if free_block_index > block.index:
         continue
     block.index = free_block_index
-    free_blocks[free_block_size].remove(free_block_index)
     new_free_size = free_block_size - block.size
     new_free_index = free_block_index + block.size
+    heapq.heappop(free_blocks[free_block_size])
     if new_free_size:
-        free_blocks[new_free_size].append(new_free_index)
+        heapq.heappush(free_blocks[new_free_size], new_free_index)
 
-total = 0
-for b in fs:
-    total += sum(b.f_id * n for n in range(b.index, b.index + b.size))
-print(total)
+print(sum(sum(b.f_id * n for n in range(b.index, b.index + b.size)) for b in fs))
