@@ -5,7 +5,7 @@ GOAL = 9
 BAD = -1
 
 
-def bfs(board: list[list[int]], cur_row: int, cur_col: int) -> int:
+def dfs(board: list[list[int]], cur_row: int, cur_col: int) -> int:
     cur_val = board[cur_row][cur_col]
     if cur_val == GOAL:
         return 1
@@ -19,7 +19,7 @@ def bfs(board: list[list[int]], cur_row: int, cur_col: int) -> int:
         )
         if board[t[0]][t[1]] == cur_val + 1
     ]
-    path_count = sum(bfs(board, opt[0], opt[1]) for opt in opts)
+    path_count = sum(dfs(board, opt[0], opt[1]) for opt in opts)
     if not path_count:
         board[cur_row][cur_col] = BAD
     return path_count
@@ -39,4 +39,4 @@ starts: set[tuple[int, int]] = set(
     if col == START
 )
 
-print(sum(bfs(board, st[0], st[1]) for st in starts))
+print(sum(dfs(board, st[0], st[1]) for st in starts))
