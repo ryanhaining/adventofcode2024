@@ -2,6 +2,7 @@
 #include <array>
 #include <cassert>
 #include <iostream>
+#include <iterator>
 #include <limits>
 #include <queue>
 #include <utility>
@@ -68,16 +69,36 @@ bool has_path(Grid grid) {
 
 }  // namespace
 
+std::istream& operator>>(std::istream& in, Point& p) {
+  in >> p.second;
+  in.ignore(1);
+  in >> p.first;
+  return in;
+}
+
 int main() {
-  std::size_t col{};
-  std::size_t row{};
-  Grid grid(SIZE, std::vector<TileState>(SIZE, TileState::free));
-  char ignore;
-  while (std::cin >> col >> ignore >> row) {
-    grid[row][col] = TileState::corrupted;
-    if (!has_path(grid)) {
-      std::cout << col << ',' << row << '\n';
-      break;
+  const Grid clean(SIZE, std::vector<TileState>(SIZE, TileState::free));
+  Point p{};
+  std::vector<Point> corrupt_points;
+  while (std::cin >> p) {
+    corrupt_points.push_back(p);
+  }
+
+  std::size_t known_good{0};
+  std::size_t known_bad{corrupt_points.size()};
+  while (known_good != known_bad - 1) {
+    auto grid = clean;
+    auto end = (known_good + known_bad) / 2;
+    for (std::size_t i = 0; i < end; ++i) {
+      auto p = corrupt_points[i];
+      grid[p.first][p.second] = TileState::corrupted;
+    }
+    if (has_path(std::move(grid))) {
+      known_good = end;
+    } else {
+      known_bad = end;
     }
   }
+  std::cout << corrupt_points[known_bad - 1].second << ','
+            << corrupt_points[known_bad - 1].first << '\n';
 }
