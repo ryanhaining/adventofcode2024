@@ -3,7 +3,7 @@
 #include <deque>
 #include <iostream>
 #include <map>
-#include <vector>
+#include <set>
 
 namespace {
 
@@ -19,10 +19,9 @@ unsigned long step(unsigned long n) {
 }
 
 using History = std::array<int, HISTORY_LEN>;
-using HistoryMap = std::map<History, int>;
 
-HistoryMap map_prices(unsigned long secret) {
-  HistoryMap result{};
+void map_prices(std::map<History, int>& totals, unsigned long secret) {
+  std::set<History> seen;
   std::deque<int> prev_changes = {};
   for (int i = 0; i < STEPS; ++i) {
     auto new_secret = step(secret);
@@ -35,32 +34,21 @@ HistoryMap map_prices(unsigned long secret) {
     if (prev_changes.size() == HISTORY_LEN) {
       auto key = History{};
       std::copy(prev_changes.begin(), prev_changes.end(), key.begin());
-      if (!result.contains(key)) {
-        result[key] = secret % 10;
+      if (!seen.contains(key)) {
+        totals[key] += secret % 10;
+        seen.insert(key);
       }
     }
   }
-  return result;
 }
 
 }  // namespace
 
 int main() {
   unsigned long secret{};
-  std::vector<HistoryMap> histories;
-  while (std::cin >> secret) {
-    histories.push_back(map_prices(secret));
-  }
   std::map<History, int> totals;
-  for (const auto& hist_map : histories) {
-    for (const auto& [k, _] : hist_map) {
-      if (totals.contains(k)) {
-        continue;
-      }
-      for (auto& hm : histories) {
-        totals[k] += hm[k];
-      }
-    }
+  while (std::cin >> secret) {
+    map_prices(totals, secret);
   }
   auto it = std::max_element(
       totals.begin(), totals.end(),
