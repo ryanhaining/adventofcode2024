@@ -1,0 +1,7 @@
+I created a .dot file and rendered with graphviz to look for mistakes.
+
+Verification by adding the x+y and comparing to the z value the program produced.
+
+Seeing which bits were wrong, and what looked structurally different in graphviz meant I could look at what operations weren't correct in the add logic.
+
+No code to add here.
