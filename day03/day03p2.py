@@ -7,7 +7,7 @@ print(
         for n1, n2 in re.findall(
             r'mul\((\d+),(\d+)\)',
             re.sub(
-                r"don't\(\).*?do\(\)", '', sys.stdin.read().replace('\n', ''), count=0
+                r"don't\(\).*?(do\(\)|$)", '', sys.stdin.read().replace('\n', ''), count=0
             ),
         )
     )
